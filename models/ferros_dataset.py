@@ -34,7 +34,7 @@ def crackGenerator(funcCoord, funcMagn,crackLen = 30, paramBouns = [0,1]):
 def randomCrackExampleLinearModel(vol):
     sizeMax = (vol[3]/5,vol[4]/5,vol[5]/5)
     coordParams = numpy.random.rand(3,2)
-    crackGenerator(lambda t:(coordParams[0][0]*vol[3]+vol[0]+t*coordParams[0][1]*sizeMax[0],
+    return crackGenerator(lambda t:(coordParams[0][0]*vol[3]+vol[0]+t*coordParams[0][1]*sizeMax[0],
                              coordParams[1][0]*vol[4]+vol[1]+t*coordParams[1][1]*sizeMax[1],
                              coordParams[2][0]*vol[5]+vol[2]+t*coordParams[2][1]*sizeMax[2]),
                    lambda t: (0,0,10+numpy.random.rand()*t))
