@@ -9,7 +9,12 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import random_seed
 from tensorflow.python.platform import gfile
-import models
+
+def dipole(x, y, z, dx, dy, dz, mx, my, mz):
+    R = (x - dx)**2 + (y - dy)**2 + (z - dz)**2
+    return (3.0*(x - dx) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mx/R**1.5,
+            3.0*(y - dy) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - my/R**1.5,
+            3.0*(z - dz) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mz/R**1.5)
 
 class DataSet(object):
 
@@ -116,26 +121,42 @@ class DataSet(object):
       end = self._index_in_epoch
       return self._images[start:end], self._labels[start:end]
 
+  def save_dataset(self, file_name):
+      numpy.savez(file_name, images = self._images, labels = self._labels)
+
+  def load_dataset(self, file_name):
+      pass
+
 def make_data_set(image_size = 50,
-                  set_size = 5000,
-                  test_size = 500,
+                  set_size = 1000,
+                  test_size = 100,
                   validation_size=100,
                   seed=None):
+  DIPOLES = 3
   all_images = []
-  all_labels = [0]*(set_size+test_size) #заглушка
+  all_labels = []
+
   print('genereate ferros data set')
   for i in range(set_size+test_size):
-    img = []
-    dz = -5.0*numpy.random.ranf()-1.1
-    dx = numpy.random.randint(0, image_size)
-    dy = numpy.random.randint(0, image_size)
-    mz = numpy.random.randint(0, 10000)
-    mx = numpy.random.randint(-10000, 10000)
-    my = numpy.random.randint(-10000, 10000)
-    for i in range(image_size):
-      for j in range(image_size):
-        img.append(models.dipole(i, j, 0, dx, dy, dz, mx, my, mz)[2] + numpy.random.normal(0, 1))
+    img = [0.0]*(image_size*image_size)
+    lbl = [0.0]*(image_size*image_size)
+    for dip in range(numpy.random.randint(0,DIPOLES)):
+      dz = -5.0*numpy.random.ranf()-1.1
+      dx = numpy.random.randint(0, image_size)
+      dy = numpy.random.randint(0, image_size)
+      mz = numpy.random.randint(0, 10000)
+      mx = numpy.random.randint(-10000, 10000)
+      my = numpy.random.randint(-10000, 10000)
+      #print ('dipole ' + str(dip) +' '+ str((dx, dy, dz)))
+      for i in range(image_size):
+        for j in range(image_size):
+          img[i + j*image_size] += dipole(i, j, 0, dx, dy, dz, mx, my, mz)[2]+numpy.random.normal(0.0,1.0)
+          if ((i-dx)**2 + (j-dy)**2 <= 25):
+            lbl[i + j*image_size] = 1.0
+          else:
+            lbl[i + j*image_size] = 0.0
     all_images.append(img)
+    all_labels.append(lbl)
   all_images=numpy.array(all_images)
   all_labels=numpy.array(all_labels)
   print ('ferros data set done')
