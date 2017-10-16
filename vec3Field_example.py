@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 import src.vec3Field as v3f
 def main(argv):
-    data = v3f.readFile(argv[0] if argv[0] != None else "09c2г_зачищ_top.txt")
+    data = v3f.readFile(argv[0] if len(argv)>0 else ".\\data\\09c2г_зачищ_top.txt")
     print(data)
     #Bz = cutSlow(data)
     #print(np.std(Bz))
