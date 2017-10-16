@@ -9,7 +9,7 @@ from tf_utils import corrupt, lrelu
 
 # %%
 def autoencoder(input_shape=[None, 900],
-                n_filters=[1, 30, 20, 20],
+                n_filters=[1, 100, 60, 40],
                 filter_sizes=[3, 3, 3, 3],
                 corruption=False):
     """Build a deep denoising autoencoder w/ tied weights.
@@ -41,7 +41,7 @@ def autoencoder(input_shape=[None, 900],
     x = tf.placeholder(
         tf.float32, input_shape, name='x')
 
-
+    out = tf.placeholder(tf.float32, input_shape, name='out')
     # %%
     # ensure 2-d is converted to square tensor.
     if len(x.get_shape()) == 2:
@@ -56,6 +56,8 @@ def autoencoder(input_shape=[None, 900],
     else:
         raise ValueError('Unsupported input dimensions')
     current_input = x_tensor
+
+    out_tensor = tf.reshape(out, [-1, x_dim, x_dim, n_filters[0]])
 
     # %%
     # Optionally apply denoising autoencoder
@@ -105,10 +107,10 @@ def autoencoder(input_shape=[None, 900],
     # now have the reconstruction through the network
     y = current_input
     # cost function measures pixel-wise difference
-    cost = tf.reduce_sum(tf.square(y - x_tensor))
+    cost = tf.reduce_sum(tf.square(y - out_tensor))
 
     # %%
-    return {'x': x, 'z': z, 'y': y, 'cost': cost}
+    return {'x': x, 'z': z, 'y': y, 'cost': cost, 'out': out}
 
 
 # %%
@@ -124,7 +126,7 @@ def test_mnist():
     # %%
     # load MNIST as before
     data_set = input_data.make_data_set()
-    
+    #data_set.train.save_dataset('temp.npz')
     mean_img = np.mean(data_set.train.images, axis=0)
     print('Images size is:' + str(data_set.train.image_size))
     ae = autoencoder(input_shape = [None, data_set.train.image_size])
@@ -141,13 +143,14 @@ def test_mnist():
     # %%
     # Fit all training data
     batch_size = 100
-    n_epochs = 200
+    n_epochs = 20
     for epoch_i in range(n_epochs):
         for batch_i in range(data_set.train.num_examples // batch_size):
             batch_xs, batch_ys = data_set.train.next_batch(batch_size)
-            train = np.array([img - mean_img for img in batch_xs])
-            sess.run(optimizer, feed_dict={ae['x']: train})
-        print(epoch_i, sess.run(ae['cost'], feed_dict={ae['x']: train}))
+            train_in = np.array([img - mean_img for img in batch_xs])
+            train_out = np.array([lbl for lbl in batch_ys])
+            sess.run(optimizer, feed_dict={ae['x']: train_in, ae['out']:train_out})
+        print(epoch_i, sess.run(ae['cost'], feed_dict={ae['x']: train_in, ae['out']:train_out}))
 
     # %%
     # Plot example reconstructions
