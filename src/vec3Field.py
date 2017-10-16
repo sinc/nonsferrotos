@@ -21,6 +21,14 @@ class vec3Field:
         self.Bx=Bx
         self.By=By
         self.Bz=Bz
+        if(self.Bx==None):
+            self.Bx = np.zeros((len(X),len(X[0])))
+        self.By=By
+        if(self.By==None):
+            self.By = np.zeros((len(X),len(X[0])))
+        self.Bz=Bz
+        if(self.Bz==None):
+            self.Bz = np.zeros((len(X),len(X[0])))
         self.vol= vol
         self.steps = steps
     def __str__(self):
