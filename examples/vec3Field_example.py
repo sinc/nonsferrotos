@@ -6,7 +6,7 @@ import numpy as np
 sys.path.append('..\\..\\')
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
-import vec3Field as v3f
+import nonsferrotos.src.vec3Field as v3f
 #plot three components of magnetic field from file
 def main(argv):
     data = v3f.readFile(argv[0] if len(argv)>0 else "..\\data\\09c2г_зачищ_top.txt")
