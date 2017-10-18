@@ -1,3 +1,4 @@
+﻿#
 import numpy as np
 
 def sinWindow(lenX, lenY):
