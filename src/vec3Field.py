@@ -20,7 +20,7 @@ class vec3Field:
         self.Bx=Bx
         self.By=By
         self.Bz=Bz
-       if(len(Bx)==0):
+        if(len(Bx)==0):
             self.Bx = np.zeros((len(X),len(X[0])))
         if(len(By)==0):
             self.By = np.zeros((len(X),len(X[0])))
