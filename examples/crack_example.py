@@ -1,20 +1,21 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-
+sys.path.append('..\\..\\')
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
-import vec3Field as v3f
-import models 
+
+import nonsferrotos.src.vec3Field as v3f
+import nonsferrotos.models.models as models
 
 xsize = 100 
 ysize = 100
-height = 10
+height = 5
 
 X,Y = np.meshgrid(range(xsize),range(ysize)) #
 vol  = [0,0,height,xsize,ysize,0]
 steps = [1,1,1]
-data = v3f.vec3Field(X,Y,None,None,None,vol,steps)
+data = v3f.vec3Field(X,Y,[],[],[],vol,steps)
 coord,magnetization = models.randomCrackExampleLinearModel(vol)
 for i in range(len(X)):
     for j in range(len(X[0])):
