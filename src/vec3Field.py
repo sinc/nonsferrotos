@@ -6,15 +6,23 @@ from numpy.fft import *
 
 from scipy import arange
 
-#the class implements magnetic field data with 
-#coordinate 2D meshgrid (X,Y);
-#field components (Bx,By,Bz);
-#vol [x0,y0,z0,Dx,Dy,Dz], where (x0,y0,z0) - start point coordinates, Dx,Dy,Dz - accordiance height, lenght and whidth;
-#steps [dx,dy,dz] - grid step massive  
+#for comparing volumes and steps massives in one string
+def compareArrays(m1,m2):
+    if(len(m1)!=len(m2)):
+        return False
+    else:
+        for it in range(len(m1)):
+            if(m1[it]!=m2[it]):
+                return False
+        return True
 class vec3Field:
     u'Class that contains data of magnetogramm'
-    #X,Y,Bx,By,Bz,vol,steps
     def __init__(self,X,Y,Bx,By,Bz,vol,steps):
+        """the class implements magnetic field data with 
+       coordinate 2D meshgrid (X,Y);
+       field components (Bx,By,Bz);
+       vol [x0,y0,z0,Dx,Dy,Dz], where (x0,y0,z0) - start point coordinates, Dx,Dy,Dz - accordiance height, lenght and whidth;
+       steps [dx,dy,dz] - grid step massive  """    
         self.X=X
         self.Y=Y
         self.Bx=Bx
@@ -31,26 +39,16 @@ class vec3Field:
     def __str__(self):
         return 'initial point:' + str(self.vol[:3])+'\n size of the data space:' +str(self.vol[3:])+'\n steps of grid:'+str(self.steps)
         #alternative simplest verison: return str(vol)+'\t'+str(steps)
-    
-    #for comparing volumes and steps massives in one string
-    def __compareArrays(m1,m2):
-        if(len(m1)!=len(m2)):
-            return False
-        else:
-            for it in range(len(m1)):
-                if(m1[it]!=m2[it]):
-                    return False
-            return True
 
     def __add__(v1,v2):
-        if(__compareArrays(v1.vol,v2.vol) and __compareArrays(v1.steps,v2.steps)):
+        if(compareArrays(v1.vol,v2.vol) and compareArrays(v1.steps,v2.steps)):
             return vec3Field(v1.X,v1.Y,v1.Bx+v2.Bx,v1.By+v2.By,v1.Bz+v2.Bz,v1.vol,v1.steps)
         else:
             print('vec3Fields have not same form')
             return None
 
     def __sub__(v1,v2):
-        if(__compareArrays(v1.vol,v2.vol) and __compareArrays(v1.steps,v2.steps)):
+        if(compareArrays(v1.vol,v2.vol) and compareArrays(v1.steps,v2.steps)):
             return vec3Field(v1.X,v1.Y,v1.Bx-v2.Bx,v1.By-v2.By,v1.Bz-v2.Bz,v1.vol,v1.steps)
         else:
             print('vec3Fields have not same form')
@@ -103,8 +101,9 @@ def saveFile(dataToSave, fileName):
             outFile.write((str(dataToSave.x[j][i]) + '\t' + str(dataToSave.y[j][i])+ '\t' + str(dataToSave.vol[2]) + '\t' + str(dataToSave.Bx[j][i])+ '\t' + str(dataToSave.By[j][i])+ '\t' + str(dataToSave.Bz[j][i]) + '\n').replace('.', ','))
     outFile.close()
 
-#shift magnetogram by fft 
+
 def precShift(data, lx, ly):
+    """shift magnetogram by fft """
     lenX = len(data.Bx[0])
     lenY = len(data.Bx)
     BxSpec = fft2(Bx)
@@ -113,3 +112,11 @@ def precShift(data, lx, ly):
     L = ifftshift([[np.exp(-1j*(2.0*np.pi*(i/lenX-0.5)*lx+2.0*np.pi*(j/lenY-0.5)*ly)) for i in np.arange(lenX)] for j in np.arange(lenY)])
     return vec3Field(data.X,data.Y,ifft2(BxSpec*L),ifft2(BySpec*L),ifft2(BzSpec*L),data.vol,data.steps)
 
+
+def nearCoordinates(vol,Xold,Yold,steps,point):
+    """find indicies from one coordinate grid to another coordinate grid with same steps"""
+    xind = int(round( (Xold[point[1]][point[0]]-vol[0]) / steps[0]))
+    yind = int(round( (Yold[point[1]][point[0]]-vol[1]) / steps[1]))
+    #print(vol,Xold[0][0],Yold[0][0],steps,point)
+    return [xind if xind>=0 and xind < vol[3]/steps[0] else np.nan,
+            yind if yind>=0 and yind < vol[4]/steps[1] else np.nan]

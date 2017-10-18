@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 from . import vec3Field as v3f
 
 #integrals are token by average window - winSize

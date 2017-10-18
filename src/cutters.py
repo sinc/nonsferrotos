@@ -1,6 +1,8 @@
-import numpy as np
+﻿import numpy as np
 from . import vec3Field as v3f
 from scipy.optimize import minimize
+
+from skimage.feature import peak_local_max
 #cut square with 2*winHalfSize size region around the point (pointOfCenter)
 #if point is near the edges of source data then cutted region includes only existense points
 def regionCutter(field,pointOfCenter,winHalfSize):
@@ -44,9 +46,42 @@ def cutSlowProcesser(B, X, Y):
     print(res)
     B0, B1x, B1y, B2x, B2y, B3x, B3y = res.x
     return B - np.array([[B0 + B1x*X[j][i] + B1y*Y[j][i]+ B2x*X[j][i]*X[j][i] + B2y*Y[j][i]*Y[j][i] + B3x*(X[j][i]**3) + B3y*(Y[j][i]**3) for i in range(lenX)] for j in range(lenY)])
-def cutSlow(data):
-    return vec3Field(data.X,data.Y,
+#
+def slowCutter(data):
+    """ cut slow field, approximated by polynomes""" 
+    return v3f.vec3Field(data.X,data.Y,
                      cutSlowProcesser(data.Bx,data.X,data.Y),
                      cutSlowProcesser(data.By,data.X,data.Y),
                      cutSlowProcesser(data.Bz,data.X,data.Y),
                      data.vol,data.steps)
+#
+
+def magnToPicture(field):
+    """transform field in 256 integer levels"""
+    maxVal = max(np.array(field).ravel())
+    minVal = min(np.array(field).ravel())
+    return np.array([[int(255.0*(field[i][j]-minVal)/(maxVal-minVal)) for j in range(len(field[0])) ] for i in range(len(field))]).astype(np.uint8)
+def autoRecRegionCutter(field):
+    """automaticaly find recatangle region, by maximal values of Bz and return this region"""
+    res = magnToPicture(np.abs(field.Bz))
+    maxMassive = peak_local_max(np.abs(res),min_distance=1)
+    #print(maxMassive)
+    if(len(maxMassive)>4):
+        maxX = max(list(zip(*maxMassive))[1])
+        minX = min(list(zip(*maxMassive))[1])
+        maxY = max(list(zip(*maxMassive))[0])
+        minY = min(list(zip(*maxMassive))[0])
+        tempX =[elem[minX:maxX] for elem in field.Bx[minY:maxY]] 
+        tempY =[elem[minX:maxX] for elem in field.By[minY:maxY]]
+        tempZ =[elem[minX:maxX] for elem in field.Bz[minY:maxY]]
+        
+        X1, Y1  = np.meshgrid(np.arange(minX*field.steps[1]+field.vol[1],maxX*field.steps[1]+field.vol[1],field.steps[1]), 
+                              np.arange(minY*field.steps[0]+field.vol[0],maxY*field.steps[0]+field.vol[0],field.steps[0])
+                              )
+        return v3f.vec3Field(X1,Y1,tempX,tempY,tempZ,
+                             [minX*field.steps[1]+field.vol[1],minY*field.steps[0]+field.vol[0],field.vol[2],
+                              (maxX-minX-1)*(field.steps[1]),(maxY-minY-1)*(field.steps[0]),0],field.steps
+                              )
+    else:
+        print("too small points to analyse")
+        return field

@@ -1,4 +1,4 @@
-#!/usr/bin/env pytnon
+﻿#!/usr/bin/env pytnon
 #
 import sys
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ import nonsferrotos.src.vec3Field as v3f
 import nonsferrotos.src.detectors as dtc
 
 def main(argv):
-    data = v3f.readFile(argv[0] if len(argv)>0 else "..\\data\\09c2г_зачищ_top.txt")
+    data = v3f.readFile(argv[0] if len(argv)>0 else "..\\data\\09g2s_strike.txt")
     print(data)
     winsize = 4
 
