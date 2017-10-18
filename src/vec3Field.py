@@ -5,7 +5,6 @@ import numpy as np
 from numpy.fft import *
 
 from scipy import arange
-from scipy.optimize import minimize
 
 #the class implements magnetic field data with 
 #coordinate 2D meshgrid (X,Y);
@@ -21,13 +20,11 @@ class vec3Field:
         self.Bx=Bx
         self.By=By
         self.Bz=Bz
-        if(self.Bx==None):
+       if(len(Bx)==0):
             self.Bx = np.zeros((len(X),len(X[0])))
-        self.By=By
-        if(self.By==None):
+        if(len(By)==0):
             self.By = np.zeros((len(X),len(X[0])))
-        self.Bz=Bz
-        if(self.Bz==None):
+        if(len(Bz)==0):
             self.Bz = np.zeros((len(X),len(X[0])))
         self.vol= vol
         self.steps = steps
@@ -116,33 +113,3 @@ def precShift(data, lx, ly):
     L = ifftshift([[np.exp(-1j*(2.0*np.pi*(i/lenX-0.5)*lx+2.0*np.pi*(j/lenY-0.5)*ly)) for i in np.arange(lenX)] for j in np.arange(lenY)])
     return vec3Field(data.X,data.Y,ifft2(BxSpec*L),ifft2(BySpec*L),ifft2(BzSpec*L),data.vol,data.steps)
 
-def cutSlowProcesser(B, X, Y):
-    def _full_error(params, *data):
-        B0, B1x, B1y, B2x, B2y, B3x, B3y = params
-        coord, Bz = data
-        X, Y = coord
-        lenX = len(Bz[0])
-        lenY = len(Bz)
-        err = 0.0
-        for j in range(lenY):
-            for i in range(lenX):
-                x = X[j][i]
-                y = Y[j][i]
-                err += (Bz[j][i] - (B0 + B1x*x + B1y*y + B2x*x*x + B2y*y*y+ B3x*x*x*x + B3y*y*y*y))**2
-        err = err/lenX/lenY
-        return err
-
-    lenX = len(B[0])
-    lenY = len(B)
-    B = np.array(B)
-    x0 = [30.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    res = minimize(_full_error, x0, ((X,Y), B), 'Powell', tol=1e-6)
-    print(res)
-    B0, B1x, B1y, B2x, B2y, B3x, B3y = res.x
-    return B - np.array([[B0 + B1x*X[j][i] + B1y*Y[j][i]+ B2x*X[j][i]*X[j][i] + B2y*Y[j][i]*Y[j][i] + B3x*(X[j][i]**3) + B3y*(Y[j][i]**3) for i in range(lenX)] for j in range(lenY)])
-def cutSlow(data):
-    return vec3Field(data.X,data.Y,
-                     cutSlowProcesser(data.Bx,data.X,data.Y),
-                     cutSlowProcesser(data.By,data.X,data.Y),
-                     cutSlowProcesser(data.Bz,data.X,data.Y),
-                     data.vol,data.steps)
