@@ -1,0 +1,2 @@
+# nonsferrotos
+Ferromagnetic fields analyse
