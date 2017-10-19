@@ -94,11 +94,11 @@ def saveFile(dataToSave, fileName):
         outFile.write(str(dat).replace('.', ',') + '\t')
     outFile.write(str(dataToSave.vol[-1]).replace('.', ',') + '\n')
     outFile.write((str(dataToSave.steps[0]) + '\t' + str(dataToSave.steps[1]) + '\t' + str(dataToSave.steps[2]) + '\n').replace('.', ','))
-    x_steps = len(dataToSave.x[0])
-    y_steps = len(dataToSave.x)
+    x_steps = len(dataToSave.X[0])
+    y_steps = len(dataToSave.X)
     for j in range(y_steps):
         for i in range(x_steps):
-            outFile.write((str(dataToSave.x[j][i]) + '\t' + str(dataToSave.y[j][i])+ '\t' + str(dataToSave.vol[2]) + '\t' + str(dataToSave.Bx[j][i])+ '\t' + str(dataToSave.By[j][i])+ '\t' + str(dataToSave.Bz[j][i]) + '\n').replace('.', ','))
+            outFile.write((str(dataToSave.X[j][i]) + '\t' + str(dataToSave.Y[j][i])+ '\t' + str(dataToSave.vol[2]) + '\t' + str(dataToSave.Bx[j][i])+ '\t' + str(dataToSave.By[j][i])+ '\t' + str(dataToSave.Bz[j][i]) + '\n').replace('.', ','))
     outFile.close()
 
 

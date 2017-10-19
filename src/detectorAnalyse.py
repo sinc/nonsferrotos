@@ -4,10 +4,10 @@ from . import detectors as dtc
 from . import vec3Field as v3f
 
 
-def detectorAnalyseData(field,detectorType,winsize = 2,distanceBetweenPoints = 3, typeOfResult = 'indicies'):
+def detectorAnalyseData(field,detectorType,winSize = 2,distanceBetweenPoints = 3, typeOfResult = 'indicies'):
     """find intersting for analyse points - maxes of detector"""
     #calc crack-detector
-    resCrack = dtc.gradDetector(field,winsize,detectorType)
+    resCrack = dtc.gradDetector(field,winSize,detectorType)
     #find maxes of crack-detector
     maxes = peak_local_max(np.array(resCrack.Bz),min_distance = distanceBetweenPoints , indices =True)
     #sort maxes in 
