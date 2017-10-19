@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+﻿from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
@@ -10,11 +10,7 @@ from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import random_seed
 from tensorflow.python.platform import gfile
 
-def dipole(x, y, z, dx, dy, dz, mx, my, mz):
-    R = (x - dx)**2 + (y - dy)**2 + (z - dz)**2
-    return (3.0*(x - dx) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mx/R**1.5,
-            3.0*(y - dy) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - my/R**1.5,
-            3.0*(z - dz) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mz/R**1.5)
+import nonsferrotos.models.models as models
 
 class DataSet(object):
 
@@ -49,10 +45,10 @@ class DataSet(object):
         assert images.shape[3] == 1
         images = images.reshape(images.shape[0],
                                 images.shape[1] * images.shape[2])
-      if dtype == dtypes.float32:
+      #if dtype == dtypes.float32:
         # Convert from [0, 255] -> [0.0, 1.0].
-        images = images.astype(numpy.float32)
-        images = numpy.multiply(images, 1.0 / 255.0) #normalize!
+        #images = images.astype(numpy.float32)
+        #images = numpy.multiply(images, 1.0 / 255.0) #normalize!
     self._images = images
     self._labels = labels
     self._epochs_completed = 0
@@ -140,6 +136,12 @@ def make_data_set(image_size = 50,
   for i in range(set_size+test_size):
     img = [0.0]*(image_size*image_size)
     lbl = [0.0]*(image_size*image_size)
+    B0 = (numpy.random.ranf() - 0.5) * 30.0
+    B1x = (numpy.random.ranf() - 0.5) * 0.01
+    B1y = (numpy.random.ranf() - 0.5) * 0.01
+    for i in range(image_size):
+      for j in range(image_size):
+        img[i + j*image_size] = B0 + B1x * i + B1y*j + numpy.random.normal(0.0,1.0)
     for dip in range(numpy.random.randint(0,DIPOLES)):
       dz = -5.0*numpy.random.ranf()-1.1
       dx = numpy.random.randint(0, image_size)
@@ -150,7 +152,7 @@ def make_data_set(image_size = 50,
       #print ('dipole ' + str(dip) +' '+ str((dx, dy, dz)))
       for i in range(image_size):
         for j in range(image_size):
-          img[i + j*image_size] += dipole(i, j, 0, dx, dy, dz, mx, my, mz)[2]+numpy.random.normal(0.0,1.0)
+          img[i + j*image_size] += models.dipole(i, j, 0, dx, dy, dz, mx, my, mz)[2]
           if ((i-dx)**2 + (j-dy)**2 <= 25):
             lbl[i + j*image_size] = 1.0
           else:

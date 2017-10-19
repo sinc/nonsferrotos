@@ -3,7 +3,7 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-sys.path.append('..\\..\\')
+
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 

@@ -1,15 +1,17 @@
-"""Tutorial on how to create a convolutional autoencoder w/ Tensorflow.
+﻿"""Tutorial on how to create a convolutional autoencoder w/ Tensorflow.
 Parag K. Mital, Jan 2016
 """
+import sys
 import tensorflow as tf
 import numpy as np
 import math
 from tf_utils import corrupt, lrelu
 
+import nonsferrotos.models.ferros_dataset as input_data
 
 # %%
 def autoencoder(input_shape=[None, 900],
-                n_filters=[1, 100, 60, 40],
+                n_filters=[1, 200, 150, 100],
                 filter_sizes=[3, 3, 3, 3],
                 corruption=False):
     """Build a deep denoising autoencoder w/ tied weights.
@@ -121,19 +123,19 @@ def test_mnist():
     #import tensorflow.examples.tutorials.mnist.input_data as input_data
     import matplotlib.pyplot as plt
 
-    import ferros_dataset as input_data
 
     # %%
     # load MNIST as before
     data_set = input_data.make_data_set()
     #data_set.train.save_dataset('temp.npz')
-    mean_img = np.mean(data_set.train.images, axis=0)
+    #mean_img = np.mean(data_set.train.images, axis=0)
     print('Images size is:' + str(data_set.train.image_size))
     ae = autoencoder(input_shape = [None, data_set.train.image_size])
 
     # %%
     learning_rate = 0.01
-    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(ae['cost'])
+    optimizer = tf.train.AdadeltaOptimizer(learning_rate).minimize(ae['cost'])
+    #optimizer = tf.train.AdamOptimizer(learning_rate).minimize(ae['cost'])
 
     # %%
     # We create a session to use the graph
@@ -143,20 +145,23 @@ def test_mnist():
     # %%
     # Fit all training data
     batch_size = 100
-    n_epochs = 20
+    n_epochs = 5000
     for epoch_i in range(n_epochs):
         for batch_i in range(data_set.train.num_examples // batch_size):
             batch_xs, batch_ys = data_set.train.next_batch(batch_size)
-            train_in = np.array([img - mean_img for img in batch_xs])
+            train_in = np.array([img for img in batch_xs])
             train_out = np.array([lbl for lbl in batch_ys])
             sess.run(optimizer, feed_dict={ae['x']: train_in, ae['out']:train_out})
-        print(epoch_i, sess.run(ae['cost'], feed_dict={ae['x']: train_in, ae['out']:train_out}))
+        error = sess.run(ae['cost'], feed_dict={ae['x']: train_in, ae['out']:train_out})
+        print(epoch_i,error)
+        if (error < 3000):
+            break
 
     # %%
     # Plot example reconstructions
     n_examples = 10
     test_xs, test_ys = data_set.test.next_batch(n_examples)
-    test_xs_norm = np.array([img - mean_img for img in test_xs])
+    test_xs_norm = np.array([img for img in test_xs])
     recon = sess.run(ae['y'], feed_dict={ae['x']: test_xs_norm})
     print(recon.shape)
     fig, axs = plt.subplots(2, n_examples, figsize=(10, 2))
@@ -165,11 +170,11 @@ def test_mnist():
             np.reshape(test_xs[example_i, :], (50, 50)))
         axs[1][example_i].imshow(
             np.reshape(
-                np.reshape(recon[example_i, ...], (2500,)) + mean_img,
+                np.reshape(recon[example_i, ...], (2500,)),
                 (50, 50)))
-    fig.show()
-    plt.draw()
-    plt.waitforbuttonpress()
+    #fig.show()
+    plt.show()
+    #plt.waitforbuttonpress()
 
 
 # %%
