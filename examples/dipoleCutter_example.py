@@ -27,7 +27,7 @@ def main(argv):
     #sort maxes in 
     maxes = sorted(maxes,key = lambda item: resCrack.Bz[item[0]][item[1]],reverse = True)
     #find inicies of maxes in source data
-    maxes = [v3f.nearCoordinates(data.vol,resCrack.X,resCrack.Y,data.steps,[point[1],point[0]]) for point in maxes]
+    maxes = [v3f.nearIndicies(data.vol,resCrack.X,resCrack.Y,data.steps,[point[1],point[0]]) for point in maxes]
     print(maxes)
     #
     dipoles, dipoleField = dpctr.dipoleCutter(data,maxes[:countOfDipolesToAnalyse],winHalfSize)

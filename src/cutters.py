@@ -56,14 +56,9 @@ def slowCutter(data):
                      data.vol,data.steps)
 #
 
-def magnToPicture(field):
-    """transform field in 256 integer levels"""
-    maxVal = max(np.array(field).ravel())
-    minVal = min(np.array(field).ravel())
-    return np.array([[int(255.0*(field[i][j]-minVal)/(maxVal-minVal)) for j in range(len(field[0])) ] for i in range(len(field))]).astype(np.uint8)
 def autoRecRegionCutter(field):
     """automaticaly find recatangle region, by maximal values of Bz and return this region"""
-    res = magnToPicture(np.abs(field.Bz))
+    res = v3f.magnToPicture(np.abs(field.Bz))
     maxMassive = peak_local_max(np.abs(res),min_distance=1)
     #print(maxMassive)
     if(len(maxMassive)>4):

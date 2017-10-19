@@ -112,11 +112,37 @@ def precShift(data, lx, ly):
     L = ifftshift([[np.exp(-1j*(2.0*np.pi*(i/lenX-0.5)*lx+2.0*np.pi*(j/lenY-0.5)*ly)) for i in np.arange(lenX)] for j in np.arange(lenY)])
     return vec3Field(data.X,data.Y,ifft2(BxSpec*L),ifft2(BySpec*L),ifft2(BzSpec*L),data.vol,data.steps)
 
-
-def nearCoordinates(vol,Xold,Yold,steps,point):
+def nearIndicies(vol,Xold,Yold,steps,point):
     """find indicies from one coordinate grid to another coordinate grid with same steps"""
     xind = int(round( (Xold[point[1]][point[0]]-vol[0]) / steps[0]))
     yind = int(round( (Yold[point[1]][point[0]]-vol[1]) / steps[1]))
     #print(vol,Xold[0][0],Yold[0][0],steps,point)
     return [xind if xind>=0 and xind < vol[3]/steps[0] else np.nan,
             yind if yind>=0 and yind < vol[4]/steps[1] else np.nan]
+
+def nearCoordinates(vol,Xold,Yold,steps,point):
+    """find coordinates from one coordinate grid to another coordinate grid with same steps"""
+    xind = int(round( (Xold[point[1]][point[0]]-vol[0]) / steps[0]))
+    yind = int(round( (Yold[point[1]][point[0]]-vol[1]) / steps[1]))
+    xind = xind if xind>=0 and xind < vol[3]/steps[0] else np.nan
+    yind = yind if yind>=0 and yind < vol[4]/steps[1] else np.nan
+    #print(vol,Xold[0][0],Yold[0][0],steps,point)
+    return [vol[1]+steps[1]*yind,vol[0]+steps[0]*xind]
+#
+def magnToPicture(field):
+    """transform field in 256 integer levels"""
+    maxVal = max(np.array(field).ravel())
+    minVal = min(np.array(field).ravel())
+    return np.array([[int(255.0*(field[i][j]-minVal)/(maxVal-minVal)) for j in range(len(field[0])) ] for i in range(len(field))]).astype(np.uint8)
+#
+def sliceX(field,x):
+    data = [] 
+    for i in range(len(field[0])):
+        data.append(field[x][i])
+    return data
+#
+def sliceY(field,x):
+    data = [] 
+    for i in range(len(field)):
+        data.append(field[i][x])
+    return data
