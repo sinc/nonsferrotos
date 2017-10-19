@@ -8,6 +8,8 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 from skimage.feature import peak_local_max
 
+sys.path.append('..\\..\\')
+
 import nonsferrotos.src.vec3Field as v3f
 import nonsferrotos.src.detectors as dtc
 import nonsferrotos.src.dipoleCutter as dpctr

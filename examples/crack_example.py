@@ -5,6 +5,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
 
+sys.path.append('..\\..\\')
 import nonsferrotos.src.vec3Field as v3f
 import nonsferrotos.models.models as models
 

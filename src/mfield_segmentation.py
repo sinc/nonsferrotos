@@ -7,6 +7,7 @@ import numpy as np
 import math
 from tf_utils import corrupt, lrelu
 
+sys.path.append('..\\..\\')
 import nonsferrotos.models.ferros_dataset as input_data
 
 # %%
