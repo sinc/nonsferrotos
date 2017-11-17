@@ -42,14 +42,16 @@ class vec3Field:
 
     def __add__(v1,v2):
         if(compareArrays(v1.vol,v2.vol) and compareArrays(v1.steps,v2.steps)):
-            return vec3Field(v1.X,v1.Y,v1.Bx+v2.Bx,v1.By+v2.By,v1.Bz+v2.Bz,v1.vol,v1.steps)
+            return vec3Field(v1.X,v1.Y,np.array(v1.Bx)+np.array(v2.Bx),
+                             np.array(v1.By)+np.array(v2.By),np.array(v1.Bz)+np.array(v2.Bz),v1.vol,v1.steps)
         else:
             print('vec3Fields have not same form')
             return None
 
     def __sub__(v1,v2):
         if(compareArrays(v1.vol,v2.vol) and compareArrays(v1.steps,v2.steps)):
-            return vec3Field(v1.X,v1.Y,v1.Bx-v2.Bx,v1.By-v2.By,v1.Bz-v2.Bz,v1.vol,v1.steps)
+            return vec3Field(v1.X,v1.Y,np.array(v1.Bx)-np.array(v2.Bx),
+                             np.array(v1.By)-np.array(v2.By),np.array(v1.Bz)-np.array(v2.Bz),v1.vol,v1.steps)
         else:
             print('vec3Fields have not same form')
             return None
@@ -112,6 +114,13 @@ def precShift(data, lx, ly):
     L = ifftshift([[np.exp(-1j*(2.0*np.pi*(i/lenX-0.5)*lx+2.0*np.pi*(j/lenY-0.5)*ly)) for i in np.arange(lenX)] for j in np.arange(lenY)])
     return vec3Field(data.X,data.Y,ifft2(BxSpec*L),ifft2(BySpec*L),ifft2(BzSpec*L),data.vol,data.steps)
 
+def indexFromCoord(vol,steps,point):
+    """find indicies from one coordinate grid to another coordinate grid with same steps"""
+    xind = (-vol[0]+point[0])/steps[0]
+    yind = (-vol[1]+point[1])/steps[1]
+    #print(vol,Xold[0][0],Yold[0][0],steps,point)
+    return [int(xind) if xind>=0 and xind < vol[3]/steps[0] else np.nan,
+            int(yind) if yind>=0 and yind < vol[4]/steps[1] else np.nan]
 def nearIndicies(vol,Xold,Yold,steps,point):
     """find indicies from one coordinate grid to another coordinate grid with same steps"""
     xind = int(round( (Xold[point[1]][point[0]]-vol[0]) / steps[0]))

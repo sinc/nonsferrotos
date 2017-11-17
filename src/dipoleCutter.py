@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import scipy.optimize as opt
 
 from . import vec3Field as v3f
@@ -36,12 +36,13 @@ def oneDipoleCutter(field,point):
     x0 = [0, 0, 0, 0, 0, 0, 0, 0,dx,dy,-16.0]
     test = opt.minimize(_fullDipole_error, x0, ((field.X,field.Y), field.Bz),'Powell', tol=1e-3)
     B0, B1x, B1y, B2x, B2y, mx, my, mz, dx, dy, dz = test["x"]
-    return [mx, my, mz, dx, dy, dz]
+    return [mx, my, mz, dx, dy, dz],[B0, B1x, B1y, B2x, B2y]
+
 def dipoleCutter(field,points,winHalfSize):
-    dipoleData=[oneDipoleCutter(ctrs.regionCutter(field,points[0],winHalfSize),points[0])]
+    dipoleData=[oneDipoleCutter(ctrs.regionCutter(field,points[0],winHalfSize),points[0])[0]]
     dipoleField = np.array([[dipoleLambdaZ(field.X[j][i], field.Y[j][i], 0, *dipoleData[-1])[2] for i in range(len(field.X[0]))] for j in range(len(field.X))])
     for point in points[1:]: 
-        dipoleData.append(oneDipoleCutter(ctrs.regionCutter(field,point,winHalfSize),point)
+        dipoleData.append(oneDipoleCutter(ctrs.regionCutter(field,point,winHalfSize),point)[0]
         )
         dipoleField += np.array([[dipoleLambdaZ(field.X[j][i], field.Y[j][i], 0, *dipoleData[-1])[2] for i in range(len(field.X[0]))] for j in range(len(field.X))])
         #dipoleField += np.array([[dipoleLambdaZ(X[j][i], Y[j][i], 0, mx, my, mz, dx, dy, dz)[2] for i in range(len(X[0]))] for j in range(len(X))])

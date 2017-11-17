@@ -6,6 +6,16 @@ def dipole(x, y, z, dx, dy, dz, mx, my, mz):
     return (3.0*(x - dx) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mx/R**1.5,
             3.0*(y - dy) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - my/R**1.5,
             3.0*(z - dz) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mz/R**1.5)
+#calculaion only one component of dipole 
+def dipoleX(x, y, z, dx, dy, dz, mx, my, mz):
+    R = (x - dx)**2 + (y - dy)**2 + (z - dz)**2
+    return 3.0*(x - dx) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mx/R**1.5
+def dipoleY(x, y, z, dx, dy, dz, mx, my, mz):
+    R = (x - dx)**2 + (y - dy)**2 + (z - dz)**2
+    return  3.0*(y - dy) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - my/R**1.5
+def dipoleZ(x, y, z, dx, dy, dz, mx, my, mz):
+    R = (x - dx)**2 + (y - dy)**2 + (z - dz)**2
+    return  3.0*(z - dz) * ((x - dx)*mx + (y - dy)*my + (z - dz)*mz) / R**2.5 - mz/R**1.5
 
 #calculate field caused by crack from array of coordinates and magntization of crack parts
 def crack(x,y,z,coordinates,magnetization):

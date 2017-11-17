@@ -3,15 +3,20 @@ from . import vec3Field as v3f
 
 #integrals are token by average window - winSize
 #type - means detector type used for processing
-def gradDetector(field,winSize = 4,type = 'crack'):
+def gradDetector(field,winSize = 4,type = 'crack',absVal = 'False'):
     grad = np.gradient(field.Bz)
     #calculate detector by formula Integrate[dBz/dx*dBz/dy]
     if(type == 'doubleGrad'):
-        data_grad = grad[0]*grad[1]
+        if(absVal):
+            data_grad = np.abs(grad[0])*np.abs(grad[1])
+        else:
+            data_grad = (grad[0])*(grad[1])
         dataRet = [[sum(data_grad[i:i+winSize,j:j+winSize].ravel()) for j in range(len(data_grad[0])-winSize)] for i in range(len(data_grad)-winSize)]
     else:
-        data_X = grad[1]*field.Bx
-        data_Y = grad[0]*field.By
+        if(absVal):
+            data_X, data_Y = np.abs(grad[1]*field.Bx),np.abs(grad[0]*field.By)
+        else:
+            data_X, data_Y = grad[1]*field.Bx,grad[0]*field.By
         #calculate detector by formula Integrate[dBz/dx*Bx]*Integrate[dBz/dy*By] 
         if(type == 'dipole'):    
             dataRet = [[sum(data_X[i:i+winSize,j:j+winSize].ravel())*sum(data_Y[i:i+winSize,j:j+winSize].ravel()) for j in range(len(data_X[0])-winSize)] for i in range(len(data_X)-winSize)]

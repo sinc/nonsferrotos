@@ -26,7 +26,6 @@ def main(argv):
     ax.plot_surface(data2.X, data2.Y, data2.Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
 
     
-    
     plt.show()
     
     data2 = ctrs.slowCutter(data)

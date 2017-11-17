@@ -1,4 +1,5 @@
 ﻿from skimage.feature import peak_local_max
+
 import numpy as np
 from . import detectors as dtc
 from . import vec3Field as v3f
@@ -9,12 +10,15 @@ def detectorAnalyseData(field,detectorType,winSize = 2,distanceBetweenPoints = 3
     #calc crack-detector
     resCrack = dtc.gradDetector(field,winSize,detectorType)
     #find maxes of crack-detector
-    maxes = peak_local_max(np.array(resCrack.Bz),min_distance = distanceBetweenPoints , indices =True)
+    maxes = peak_local_max(np.array(np.abs(resCrack.Bz)),min_distance = distanceBetweenPoints , indices =True)
+    #maxes = argrelextrema(np.array(resCrack.Bz),np.less,axis=1)
+    #print(maxes)
+    #maxes = [[int(maxVal[0]-winSize/2),int(maxVal[1]-winSize/2)] for maxVal in maxes]
     #sort maxes in 
     maxes = sorted(maxes,key = lambda item: resCrack.Bz[item[0]][item[1]],reverse = True)
     #find inicies of maxes in source field
     if(typeOfResult == 'indicies'):
-        print(maxes[0])
+        #print(maxes[0])
         return resCrack,[v3f.nearIndicies(field.vol,resCrack.X,resCrack.Y,field.steps,[point[1],point[0]]) for point in maxes]
     else:
         if(typeOfResult =='coords'):

@@ -1,16 +1,15 @@
 ﻿import numpy as np
 from . import vec3Field as v3f
 from scipy.optimize import minimize
-
 from skimage.feature import peak_local_max
 #cut square with 2*winHalfSize size region around the point (pointOfCenter)
 #if point is near the edges of source data then cutted region includes only existense points
 def regionCutter(field,pointOfCenter,winHalfSize):
     print(field)
-    startXIndex =pointOfCenter[0]-winHalfSize if pointOfCenter[0]-winHalfSize>=0 else 0 
-    startYIndex =pointOfCenter[1]-winHalfSize if pointOfCenter[1]-winHalfSize>=0 else 0 
-    stopXIndex =pointOfCenter[0]+winHalfSize if pointOfCenter[0]+winHalfSize-len(field.X[0])<0 else len(field.X[0])-1
-    stopYIndex =pointOfCenter[1]+winHalfSize if pointOfCenter[1]+winHalfSize-len(field.X)<0 else len(field.X)-1
+    startXIndex =int(pointOfCenter[0]-winHalfSize if pointOfCenter[0]-winHalfSize>=0 else 0 )
+    startYIndex =int(pointOfCenter[1]-winHalfSize if pointOfCenter[1]-winHalfSize>=0 else 0 )
+    stopXIndex =int(pointOfCenter[0]+winHalfSize if pointOfCenter[0]+winHalfSize-len(field.X[0])<0 else len(field.X[0])-1)
+    stopYIndex =int(pointOfCenter[1]+winHalfSize if pointOfCenter[1]+winHalfSize-len(field.X)<0 else len(field.X)-1)
     print('bounds of cuted region:',startXIndex,stopXIndex,startYIndex,stopYIndex)
     volNew = [field.X[startYIndex][startXIndex],field.Y[startYIndex][startXIndex],field.vol[2],(stopXIndex-startXIndex)*field.steps[0],(stopYIndex-startYIndex)*field.steps[1],0.0] 
     X1, Y1  = np.meshgrid(
@@ -56,9 +55,11 @@ def slowCutter(data):
                      data.vol,data.steps)
 #
 
-def autoRecRegionCutter(field):
-    """automaticaly find recatangle region, by maximal values of Bz and return this region"""
-    res = v3f.magnToPicture(np.abs(field.Bz))
+def autoRecRegionCutter(field,maxSource = lambda x:np.abs(x.Bz)):
+    """automaticaly find recatangle region, by maximal values of special function maxSource
+    and return this region. It is abs(Bz) as default.
+    """
+    res = v3f.magnToPicture(maxSource(field))
     maxMassive = peak_local_max(np.abs(res),min_distance=1)
     #print(maxMassive)
     if(len(maxMassive)>4):
