@@ -34,7 +34,7 @@ def main(argv):
     
 
     plt.show()
-    
+    print('ok')
 if __name__ == "__main__":
     main(sys.argv[1:])
 

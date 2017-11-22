@@ -28,15 +28,40 @@ def _fullDipole_error(params, *data):
     err = err/lenX/lenY
     #print (err,(dx,dy,dz),(mx,my,mz))
     return err
+def _fullDipoleLinear_error(params, *data):
+    B0, B1x, B1y, mx,my, mz,dx, dy, dz = params
+    coord, Bz,  = data
+    X, Y = coord
+    
+    z = 0
+    err = 0.0
+    
+    lenX = len(Bz[0])
+    lenY = len(Bz)
+
+    for j in range(lenY):
+        for i in range(lenX):
+            x = X[j][i]
+            y = Y[j][i]
+            field = dipoleLambdaZ(x, y, z, mx, my, mz, dx, dy, dz)
+            err += (Bz[j][i] - (B0 + B1x*x + B1y*y+field[2]))**2
+    err = err/lenX/lenY
+    #print (err,(dx,dy,dz),(mx,my,mz))
+    return err
 def oneDipoleCutter(field,point):    
     point = [point[1],point[0]]
     print('pointToAnalyse:',point)
     dx = field.vol[0]+field.vol[3]/2.0
     dy = field.vol[1]+field.vol[4]/2.0
-    x0 = [0, 0, 0, 0, 0, 0, 0, 0,dx,dy,-16.0]
-    test = opt.minimize(_fullDipole_error, x0, ((field.X,field.Y), field.Bz),'Powell', tol=1e-3)
-    B0, B1x, B1y, B2x, B2y, mx, my, mz, dx, dy, dz = test["x"]
-    return [mx, my, mz, dx, dy, dz],[B0, B1x, B1y, B2x, B2y]
+    x0 = [ 0, 0, 0, 0, 0, 0,dx,dy,-16.0]
+    #x0 = [0, 0, 0, 0, 0, 0, 0, 0,dx,dy,-16.0]
+    #test = opt.minimize(_fullDipole_error, x0, ((field.X,field.Y), field.Bz),'Powell', tol=1e-3)
+    #B0, B1x, B1y, B2x, B2y, mx, my, mz, dx, dy, dz = test["x"]
+    #return [mx, my, mz, dx, dy, dz],[B0, B1x, B1y, B2x, B2y]
+    test = opt.minimize(_fullDipoleLinear_error, x0, ((field.X,field.Y), field.Bz),'Powell', tol=1e-3)
+    B0, B1x, B1y, mx, my, mz, dx, dy, dz = test["x"]
+    return [mx, my, mz, dx, dy, dz],[B0, B1x, B1y]
+    
 
 def dipoleCutter(field,points,winHalfSize):
     dipoleData=[oneDipoleCutter(ctrs.regionCutter(field,points[0],winHalfSize),points[0])[0]]

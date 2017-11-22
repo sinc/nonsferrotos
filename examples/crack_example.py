@@ -26,3 +26,4 @@ ax = fig.gca(projection='3d')
 ax.plot_surface(data.X, data.Y, data.Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
         
 plt.show()
+print('ok')

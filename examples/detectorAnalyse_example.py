@@ -74,7 +74,7 @@ def main(argv):
     plt.plot(list(zip(*points))[1],list(zip(*points))[0],'wo')
     #plt.savefig('sourceWithMax')
     plt.show()
-    
+    print('ok')
     
 if __name__ == "__main__":
     main(sys.argv[1:])

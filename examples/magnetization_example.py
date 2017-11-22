@@ -11,6 +11,8 @@ import nonsferrotos.src.vec3Field as v3f
 import nonsferrotos.src.recMagnetCutter as rMcut
 
 def main(argv):
+    print("now it doesn't work (((")
+    exit()
     data = v3f.readFile(argv[0] if len(argv)>0 else "..\\data\\09g2s_strike.txt")
     print(data)
     

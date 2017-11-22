@@ -51,6 +51,7 @@ def main(argv):
     ax.plot_surface(data2.X, data2.Y, data2.Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
 
     plt.show()
+    print('ok')
 if __name__ == "__main__":
     main(sys.argv[1:])
 

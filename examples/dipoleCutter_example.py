@@ -12,39 +12,57 @@ sys.path.append('..\\..\\')
 
 import nonsferrotos.src.vec3Field as v3f
 import nonsferrotos.src.detectors as dtc
+import nonsferrotos.src.cutters as ctrs
 import nonsferrotos.src.dipoleCutter as dpctr
-
+import nonsferrotos.src.detectorAnalyse as dAn
 def main(argv):
     data = v3f.readFile(argv[0] if len(argv)>0 else "..\\data\\09g2s_strike.txt")
     print(data)
     winsize = 4
     winHalfSize = 8
-    countOfDipolesToAnalyse = 1
-    #calc crack-detector
-    resCrack = dtc.gradDetector(data,winsize,'crack')
-    #find maxes of crack-detector
-    maxes = peak_local_max(np.array(resCrack.Bz),min_distance = 3 , indices =True)
-    #sort maxes in 
-    maxes = sorted(maxes,key = lambda item: resCrack.Bz[item[0]][item[1]],reverse = True)
-    #find inicies of maxes in source data
-    maxes = [v3f.nearIndicies(data.vol,resCrack.X,resCrack.Y,data.steps,[point[1],point[0]]) for point in maxes]
-    print(maxes)
-    #
-    dipoles, dipoleField = dpctr.dipoleCutter(data,maxes[:countOfDipolesToAnalyse],winHalfSize)
-    fig = plt.figure('source')
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(data.X, data.Y, data.Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
+    countOfDipolesToAnalyse = 2
     
-    fig = plt.figure('dipole Field')
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(dipoleField.X, dipoleField.Y, dipoleField.Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
+    #auto cut area under the sample
+    data = ctrs.autoRecRegionCutter(data)
+    #find maxes of dipole detector
+    resDet, maxes = dAn.detectorAnalyseData(data,'crack',typeOfResult = 'indicies')
+    resDet, maxesCoords = dAn.detectorAnalyseData(data,'crack',typeOfResult = 'coords')
+    print(maxes)
+    #dipole Cutter
+    dipoles, dipoleField = dpctr.dipoleCutter(data,maxes[:countOfDipolesToAnalyse],winHalfSize)
 
+    fig = plt.figure('cuted source')
+    plt.xlabel('$x$, mm', fontsize=18)
+    plt.ylabel('$y$, mm', fontsize=18)
+    plt.pcolor(data.X, data.Y, data.Bz, cmap=plt.cm.spectral)
+    clb = plt.colorbar()
+    clb.set_label('$B_z, \mu T$', fontsize=18)
+    
+    fig = plt.figure('detector with maxes')
+    plt.xlabel('$x$, mm', fontsize=18)
+    plt.ylabel('$y$, mm', fontsize=18)
+    plt.pcolor(resDet.X, resDet.Y, (resDet).Bz,cmap=plt.cm.spectral)
+    plt.plot(list(zip(*maxesCoords[countOfDipolesToAnalyse:]))[1],list(zip(*maxesCoords[countOfDipolesToAnalyse:]))[0],'wx')
+    plt.plot(list(zip(*maxesCoords[:countOfDipolesToAnalyse]))[1],list(zip(*maxesCoords[:countOfDipolesToAnalyse]))[0],'rx')
+    clb = plt.colorbar()
+    clb.set_label('$B_z, \mu T$', fontsize=18)
+
+    fig = plt.figure('dipole Field')
+    plt.xlabel('$x$, mm', fontsize=18)
+    plt.ylabel('$y$, mm', fontsize=18)
+    plt.pcolor(dipoleField.X, dipoleField.Y, dipoleField.Bz,cmap=plt.cm.spectral)
+    clb = plt.colorbar()
+    clb.set_label('$B_z, \mu T$', fontsize=18)
+  
     fig = plt.figure('substracted field')
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(dipoleField.X, dipoleField.Y, (dipoleField-data).Bz, rstride=1, cstride=1, cmap=cm.gist_rainbow)
+    plt.xlabel('$x$, mm', fontsize=18)
+    plt.ylabel('$y$, mm', fontsize=18)
+    plt.pcolor(dipoleField.X, dipoleField.Y, (dipoleField-data).Bz,cmap=plt.cm.spectral)
+    clb = plt.colorbar()
+    clb.set_label('$B_z, \mu T$', fontsize=18)
 
     plt.show()
-    
+    print('ok')
 if __name__ == "__main__":
     main(sys.argv[1:])
 

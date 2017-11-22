@@ -1,4 +1,4 @@
-    #!/usr/bin/env pytnon
+﻿    #!/usr/bin/env pytnon
 #
 import sys
 import matplotlib.pyplot as plt
@@ -57,6 +57,7 @@ def main(argv):
     plt.plot(list(zip(*points))[1],list(zip(*points))[0],'wo')
     
     plt.show()
+    print('ok')
 if __name__ == "__main__":
     main(sys.argv[1:])
 
